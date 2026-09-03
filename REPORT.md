@@ -54,7 +54,26 @@ lab28 release → lab28-rag-release v2, alias=champion, run_id f430cb76...
 lab28 seed    → documents 13 accepted / 0 rejected; feedback 12 accepted / 0 rejected
 ```
 
-## 3. Mười điểm kết nối (Definition of Done)
+## 3. Kiến trúc và phân vai (ownership)
+
+![Sơ đồ kiến trúc](docs/images/lab28-architecture-overview.png)
+
+Ba vùng đọc theo `README.md`: (1) luồng chính user → Envoy → FastAPI → Kafka →
+Airflow → Delta; (2) dữ liệu/mô hình Delta → Feast/Qdrant/MLflow, FastAPI → vLLM;
+(3) giám sát Prometheus/Grafana + OpenTelemetry/Jaeger.
+
+Làm **cá nhân** nên một người đi qua đủ 5 vai; bảng dưới là ai-sở-hữu-cái-gì theo
+`contracts/integration-matrix.yaml` (mình đảm nhiệm toàn bộ):
+
+| Vai (owner trong matrix) | Boundary | Thành phần |
+|---|---|---|
+| `team-ingestion` | IP01–IP02 | Kafka topics, producer, Airflow DAG, DLQ/replay |
+| `team-data` | IP03, IP04, IP06 | Spark/Delta MERGE, Feast repo + materialize, MLflow release |
+| `team-serving` | IP05, IP07 | Qdrant hybrid retrieval, vLLM client, degraded path |
+| `team-platform` | IP08–IP10 | Envoy gateway, OTEL collector, Prometheus/Grafana, K8s/GitOps |
+| `team-presenter` | — | Evidence index, incident narrative, Q&A |
+
+## 4. Mười điểm kết nối (Definition of Done)
 
 `evidence/integration-report.json`: **score 83**, 6 verified / 5 passing / 4 unverified-from-serving-process.
 Bốn điểm `unverified` là do bản chất thiết kế (không probe được từ tiến trình serving) và
@@ -64,9 +83,9 @@ Bốn điểm `unverified` là do bản chất thiết kế (không probe đư�
 |---|---|---|---|
 | IP01 | HTTP → Kafka | ✅ | `ip01-kafka-consume.json`: 2 message trên `data.raw`, key = `entity_id`, header `traceparent=00-b4534e10…-01` + `idempotency-key` + `schema_version` |
 | IP02 | Kafka → Airflow 3 | ✅ | `ip02-airflow-run.json`: run `ev-37596084` state **success** (57s); 4/4 task success; 4 asset event: `lab28://delta/{documents,feedback}`, `lab28://qdrant/lab28_documents`, `lab28://feast/asker_activity` |
-| IP03 | Airflow/Spark → Delta | ✅ | `ip03-delta-history.json`: feedback v19 (35 rows), documents v11 (52 rows); history 19×`MERGE` + `CREATE TABLE`; time-travel v0→v19 (0 → 35 rows) |
+| IP03 | Airflow/Spark → Delta | ✅ | `ip03-delta-history.json`: feedback v23 (38 rows), documents v13 (54 rows); Delta history + `CREATE TABLE`; time-travel v0→v23 (0 → 38 rows) |
 | IP04 | Delta → Feast | ✅ | `ip04-feast-online.json`: HTTP 200, cả 4 feature `PRESENT` cho `ev-asker-37596084` (avg_rating 5.0, feedback_count 1, negative_ratio 0.0, delta_version 20) |
-| IP05 | Delta docs → Qdrant | ✅ | `ip05-qdrant-search.json`: 52 point, embedding `paraphrase-multilingual-MiniLM-L12-v2@faf4aa42…`, point ID deterministic (uuid5) |
+| IP05 | Delta docs → Qdrant | ✅ | `ip05-qdrant-search.json`: 54 point, embedding `paraphrase-multilingual-MiniLM-L12-v2@faf4aa42…`, point ID deterministic (uuid5) |
 | IP06 | Eval → MLflow Registry | ✅ | `ip06-mlflow-release.json`: `lab28-rag-release v2 is champion`, run_id `f430cb76…`; J3 chứng minh promote + rollback alias |
 | IP07 | RAG → vLLM thật | ⚠️ **UNVERIFIED** | `ip07-vllm-identity.json`: `unreachable: ConnectError`, `is_real_vllm=false`. Không có GPU/endpoint — xem [§7](#7-những-phần-chưa-verify-được--cần-quyềntài-khoản). **Không fake server.** |
 | IP08 | Client → Envoy gateway | ✅ | `ip08-gateway.json`: `200 OK` (x-request-id `67d07dd5…`) và `429 Too Many Requests` (x-request-id `929df1b5…`) — rate limit 10 token/1s hoạt động đúng |
@@ -232,7 +251,7 @@ loại khỏi rotation và toàn bộ request sẽ hỏng, dù retrieval + LLM v
 ## 10. Checklist demo — trạng thái
 
 - [x] Sơ đồ kiến trúc, người phụ trách, 10 điểm kết nối
-- [x] Luồng chạy đúng có run ID (`ev-37596084`), trace ID (`44cbe2cb…`), Delta version (feedback v19 / documents v11), MLflow version (v2 champion)
+- [x] Luồng chạy đúng có run ID (`ev-37596084`), trace ID (`44cbe2cb…`), Delta version (feedback v23 / documents v13), MLflow version (v6 champion)
 - [x] Kafka gửi lại nhưng Delta không có row trùng (J2 9/9, chạy lại 3 lần)
 - [x] Sự cố + khôi phục + chứng minh không mất dữ liệu (J4 degraded → recovery)
 - [x] Golden signals trên Grafana + một trace Jaeger xuyên hệ thống (20 span/3 service)

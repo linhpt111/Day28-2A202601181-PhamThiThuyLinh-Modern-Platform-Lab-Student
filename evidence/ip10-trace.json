@@ -1,0 +1,156 @@
+{
+  "description": "IP10: a single trace id carried across Envoy -> FastAPI -> Kafka -> Airflow -> Spark/Delta",
+  "trace_id": "44cbe2cbfba3f43a05f175a98f89e7fb",
+  "traceparent": "00-44cbe2cbfba3f43a05f175a98f89e7fb-caa9c570a039c863-01",
+  "required_spans": [
+    "lab28.gateway.request",
+    "lab28.api.ingest",
+    "lab28.kafka.produce",
+    "lab28.kafka.consume",
+    "lab28.airflow.dag",
+    "lab28.spark.delta_merge"
+  ],
+  "present_span_names": [
+    "POST /api/v1/documents",
+    "POST /api/v1/documents http receive",
+    "POST /api/v1/documents http send",
+    "POST /api/v1/feedback",
+    "POST /api/v1/feedback http receive",
+    "POST /api/v1/feedback http send",
+    "lab28.airflow.dag",
+    "lab28.api.ingest",
+    "lab28.gateway.request",
+    "lab28.kafka.consume",
+    "lab28.kafka.produce",
+    "lab28.spark.delta_merge"
+  ],
+  "missing_required": [],
+  "services": [
+    "lab28-airflow",
+    "lab28-api",
+    "lab28-gateway"
+  ],
+  "span_count": 20,
+  "spans": [
+    {
+      "operationName": "POST /api/v1/feedback http send",
+      "service": "lab28-api",
+      "spanID": "9bb90f0164be31e7",
+      "duration_us": 52
+    },
+    {
+      "operationName": "lab28.api.ingest",
+      "service": "lab28-api",
+      "spanID": "93436a6baa76d950",
+      "duration_us": 3377
+    },
+    {
+      "operationName": "lab28.airflow.dag",
+      "service": "lab28-airflow",
+      "spanID": "812a234d2b391585",
+      "duration_us": 29536573
+    },
+    {
+      "operationName": "POST /api/v1/documents http send",
+      "service": "lab28-api",
+      "spanID": "308fcf21f8206c1b",
+      "duration_us": 19
+    },
+    {
+      "operationName": "POST /api/v1/documents http send",
+      "service": "lab28-api",
+      "spanID": "da33e8be5464858a",
+      "duration_us": 12
+    },
+    {
+      "operationName": "POST /api/v1/feedback http send",
+      "service": "lab28-api",
+      "spanID": "806a0f9afc1e2fc4",
+      "duration_us": 21
+    },
+    {
+      "operationName": "lab28.kafka.produce",
+      "service": "lab28-api",
+      "spanID": "2d7ff1dae1ce2d85",
+      "duration_us": 3629
+    },
+    {
+      "operationName": "lab28.api.ingest",
+      "service": "lab28-api",
+      "spanID": "e35d88a87fc501d7",
+      "duration_us": 3911
+    },
+    {
+      "operationName": "POST /api/v1/documents http send",
+      "service": "lab28-api",
+      "spanID": "5c7b0aec4f796cf2",
+      "duration_us": 49
+    },
+    {
+      "operationName": "POST /api/v1/feedback",
+      "service": "lab28-api",
+      "spanID": "5d31117b7abb95b7",
+      "duration_us": 48191
+    },
+    {
+      "operationName": "lab28.kafka.produce",
+      "service": "lab28-api",
+      "spanID": "ecebcc5ac52218da",
+      "duration_us": 3137
+    },
+    {
+      "operationName": "lab28.kafka.consume",
+      "service": "lab28-airflow",
+      "spanID": "780df01f2da681b1",
+      "duration_us": 63
+    },
+    {
+      "operationName": "lab28.spark.delta_merge",
+      "service": "lab28-airflow",
+      "spanID": "9105c2f5e947f02e",
+      "duration_us": 26448519
+    },
+    {
+      "operationName": "POST /api/v1/documents http receive",
+      "service": "lab28-api",
+      "spanID": "19ccd49591d1f836",
+      "duration_us": 34
+    },
+    {
+      "operationName": "POST /api/v1/documents",
+      "service": "lab28-api",
+      "spanID": "c07bde93c6a3026d",
+      "duration_us": 10761
+    },
+    {
+      "operationName": "POST /api/v1/feedback http send",
+      "service": "lab28-api",
+      "spanID": "63171019e32ae46d",
+      "duration_us": 16
+    },
+    {
+      "operationName": "lab28.kafka.consume",
+      "service": "lab28-airflow",
+      "spanID": "1f8a17be2b31be6f",
+      "duration_us": 25
+    },
+    {
+      "operationName": "lab28.gateway.request",
+      "service": "lab28-gateway",
+      "spanID": "f9f0e3102c353452",
+      "duration_us": 14044
+    },
+    {
+      "operationName": "lab28.gateway.request",
+      "service": "lab28-gateway",
+      "spanID": "8a46380fd81c33e0",
+      "duration_us": 50316
+    },
+    {
+      "operationName": "POST /api/v1/feedback http receive",
+      "service": "lab28-api",
+      "spanID": "3bca46000b9b2c80",
+      "duration_us": 39631
+    }
+  ]
+}

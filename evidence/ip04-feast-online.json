@@ -1,0 +1,86 @@
+{
+  "description": "IP04: Feast online features for the asker this journey created (request built by feast_online_request())",
+  "request": {
+    "entities": {
+      "asker_id": [
+        "ev-asker-37596084"
+      ]
+    },
+    "features": [
+      "asker_activity_v1:feedback_count",
+      "asker_activity_v1:avg_rating",
+      "asker_activity_v1:negative_ratio",
+      "asker_activity_v1:delta_version"
+    ],
+    "full_feature_names": false
+  },
+  "status_code": 200,
+  "response": {
+    "results": [
+      {
+        "values": [
+          "ev-asker-37596084"
+        ],
+        "statuses": [
+          "PRESENT"
+        ],
+        "event_timestamps": [
+          "1970-01-01T00:00:00Z"
+        ]
+      },
+      {
+        "values": [
+          5.0
+        ],
+        "statuses": [
+          "PRESENT"
+        ],
+        "event_timestamps": [
+          "2026-09-03T17:02:23Z"
+        ]
+      },
+      {
+        "values": [
+          20
+        ],
+        "statuses": [
+          "PRESENT"
+        ],
+        "event_timestamps": [
+          "2026-09-03T17:02:23Z"
+        ]
+      },
+      {
+        "values": [
+          0.0
+        ],
+        "statuses": [
+          "PRESENT"
+        ],
+        "event_timestamps": [
+          "2026-09-03T17:02:23Z"
+        ]
+      },
+      {
+        "values": [
+          1
+        ],
+        "statuses": [
+          "PRESENT"
+        ],
+        "event_timestamps": [
+          "2026-09-03T17:02:23Z"
+        ]
+      }
+    ],
+    "metadata": {
+      "feature_names": [
+        "asker_id",
+        "avg_rating",
+        "delta_version",
+        "negative_ratio",
+        "feedback_count"
+      ]
+    }
+  }
+}

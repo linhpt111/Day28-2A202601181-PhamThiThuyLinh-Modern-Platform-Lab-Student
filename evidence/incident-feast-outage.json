@@ -1,0 +1,41 @@
+{
+  "scenario": "Feast (non-mandatory dependency) outage",
+  "runbook": "runbooks/failure-injection.md — \"Feast down\"",
+  "timeline_utc": {
+    "T0_baseline": "2026-09-03T17:11:58Z",
+    "T1_inject": "2026-09-03T17:12:27Z",
+    "T2_observed": "2026-09-03T17:12:34Z",
+    "T3_submitted_during_outage": "2026-09-03T17:12:52Z",
+    "T4_recover_start": "2026-09-03T17:13:01Z",
+    "T5_feast_healthy": "2026-09-03T17:13:25Z",
+    "T6_recovery_dag_success": "2026-09-03T17:14:36Z"
+  },
+  "predicted_signal": "feast component ready=false; overall status stays degraded (non-mandatory); ingestion keeps returning 202",
+  "observed": {
+    "ready_before": "degraded (vllm only)",
+    "ready_during": "degraded (vllm + feast)",
+    "ready_after": "degraded (vllm only)",
+    "ingestion_during_outage": "HTTP 202 accepted, event_id d37674ae738f4204bde77cbc667381c8"
+  },
+  "root_cause": "deliberate injection: docker compose stop feast",
+  "recovery": "docker compose start feast (healthy in ~24s), then one pipeline run inc-b8d6c2f3 (success, 56s) drained the buffered event",
+  "no_data_loss_proof": {
+    "asker_id": "inc-b8d6c2f3",
+    "delta_rows_for_asker": 1,
+    "delta_version_after": 22,
+    "feast_online": {
+      "asker_id": "inc-b8d6c2f3",
+      "avg_rating": 4.0,
+      "feedback_count": 1,
+      "negative_ratio": 0.0,
+      "delta_version": 22
+    },
+    "feast_statuses": [
+      "PRESENT",
+      "PRESENT",
+      "PRESENT",
+      "PRESENT",
+      "PRESENT"
+    ]
+  }
+}

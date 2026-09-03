@@ -1,0 +1,84 @@
+{
+  "description": "IP09: Prometheus scrape targets and alert rules",
+  "targets": [
+    {
+      "job": "lab28-airflow-batch",
+      "instance": "pushgateway:9091",
+      "health": "up",
+      "lastScrape": "2026-09-03T17:01:41.869621397Z"
+    },
+    {
+      "job": "lab28-api",
+      "instance": "api:8000",
+      "health": "up",
+      "lastScrape": "2026-09-03T17:01:37.405212839Z"
+    },
+    {
+      "job": "lab28-collector",
+      "instance": "otel-collector:8888",
+      "health": "up",
+      "lastScrape": "2026-09-03T17:01:40.733667137Z"
+    },
+    {
+      "job": "lab28-feast",
+      "instance": "feast:8000",
+      "health": "up",
+      "lastScrape": "2026-09-03T17:01:37.840711963Z"
+    },
+    {
+      "job": "lab28-gateway",
+      "instance": "gateway:9901",
+      "health": "up",
+      "lastScrape": "2026-09-03T17:01:40.853637214Z"
+    },
+    {
+      "job": "lab28-kafka",
+      "instance": "kafka-exporter:9308",
+      "health": "up",
+      "lastScrape": "2026-09-03T17:01:39.383981794Z"
+    },
+    {
+      "job": "lab28-mlflow",
+      "instance": "api:8000",
+      "health": "up",
+      "lastScrape": "2026-09-03T17:01:41.453524648Z"
+    },
+    {
+      "job": "lab28-prometheus",
+      "instance": "prometheus:9090",
+      "health": "up",
+      "lastScrape": "2026-09-03T17:01:39.05877235Z"
+    },
+    {
+      "job": "lab28-qdrant",
+      "instance": "qdrant:6333",
+      "health": "up",
+      "lastScrape": "2026-09-03T17:01:37.55618293Z"
+    },
+    {
+      "job": "lab28-vllm-optional",
+      "instance": "host.docker.internal:8001",
+      "health": "down",
+      "lastScrape": "2026-09-03T17:01:41.005038703Z"
+    }
+  ],
+  "rule_groups": [
+    {
+      "name": "lab28-slo",
+      "rules": [
+        {
+          "name": "Lab28ApiUnavailable",
+          "type": "alerting",
+          "state": "inactive",
+          "query": "up{job=\"lab28-api\"} == 0"
+        },
+        {
+          "name": "Lab28HighErrorRatio",
+          "type": "alerting",
+          "state": "inactive",
+          "query": "sum(rate(lab28_requests_total{status=~\"5..\"}[5m])) / clamp_min(sum(rate(lab28_requests_total[5m])), 1) > 0.05"
+        }
+      ]
+    }
+  ]
+}

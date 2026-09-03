@@ -1,0 +1,64 @@
+{
+  "description": "IP02: Kafka -> Airflow 3 pipeline run with task states and asset events",
+  "dag_run": {
+    "dag_id": "lab28_ingestion_pipeline",
+    "dag_run_id": "ev-37596084",
+    "state": "success",
+    "run_type": "manual",
+    "conf": {
+      "traceparent": "00-b4534e10b8c94669639b46f65c88de6f-b6890dc7b711bbb6-01"
+    },
+    "start_date": "2026-09-03T17:02:59.156161Z",
+    "end_date": "2026-09-03T17:03:55.879299Z",
+    "duration": 56.723138,
+    "triggered_by": "rest_api"
+  },
+  "task_instances": [
+    {
+      "task_id": "drain_kafka_into_delta",
+      "state": "success",
+      "duration": 34.871,
+      "try_number": 1
+    },
+    {
+      "task_id": "refresh_online_features",
+      "state": "success",
+      "duration": 17.846,
+      "try_number": 1
+    },
+    {
+      "task_id": "index_new_documents",
+      "state": "success",
+      "duration": 11.743,
+      "try_number": 1
+    },
+    {
+      "task_id": "announce_processed_batch",
+      "state": "success",
+      "duration": 1.968,
+      "try_number": 1
+    }
+  ],
+  "asset_events": [
+    {
+      "uri": "lab28://delta/documents",
+      "timestamp": "2026-09-03T17:03:34.178879Z",
+      "source_task_id": "drain_kafka_into_delta"
+    },
+    {
+      "uri": "lab28://delta/feedback",
+      "timestamp": "2026-09-03T17:03:34.187733Z",
+      "source_task_id": "drain_kafka_into_delta"
+    },
+    {
+      "uri": "lab28://qdrant/lab28_documents",
+      "timestamp": "2026-09-03T17:03:46.667761Z",
+      "source_task_id": "index_new_documents"
+    },
+    {
+      "uri": "lab28://feast/asker_activity",
+      "timestamp": "2026-09-03T17:03:52.729634Z",
+      "source_task_id": "refresh_online_features"
+    }
+  ]
+}

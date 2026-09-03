@@ -1,0 +1,32 @@
+{
+  "description": "IP08: gateway forwards a 200 and enforces a 429, both stamped with x-request-id",
+  "gateway": "envoy v1.39.1 local_ratelimit token_bucket max_tokens=10 fill_interval=1s",
+  "ok_response": {
+    "status_line": "HTTP/1.1 200 OK",
+    "headers": {
+      "date": "Thu, 03 Sep 2026 17:01:28 GMT",
+      "server": "envoy",
+      "content-length": "536",
+      "content-type": "application/json",
+      "x-lab28-trace-id": "d15945b642c840f0991d008d6b75142e",
+      "traceparent": "00-d15945b642c840f0991d008d6b75142e-aa6ba9381f94558c-01",
+      "x-envoy-upstream-service-time": "415",
+      "x-request-id": "67d07dd5-74b4-95cb-9653-cad3b07d7a6f",
+      "x-envoy-decorator-operation": "lab28.gateway.request"
+    },
+    "body": "{\"schema_version\":\"1\",\"status\":\"degraded\",\"components\":[{\"name\":\"kafka\",\"ready\":true,\"detail\":\"1 broker(s); 4 declared topics present\",\"owner\":\"team-ingestion\"},{\"name\":\"mlflow\",\"ready\":true,\"detail\":\"lab28-rag-release v2 is champion\",\"owner\":\"team-data\"},{\"name\":\"qdrant\",\"ready\":true,\"detail\":\"52 points; ok\",\"owner\":\"team-serving\"},{\"name\":\"vllm\",\"ready\":false,\"detail\":\"unreachable: ConnectError\",\"owner\":\"team-serving\"},{\"name\":\"feast\",\"ready\":true,\"detail\":\"ok\",\"owner\":\"team-data\"}],\"trace_id\":\"d15945b642c840f0991d008d6b75142e\"}"
+  },
+  "rate_limited_response": {
+    "status_line": "HTTP/1.1 429 Too Many Requests",
+    "headers": {
+      "x-request-id": "929df1b5-e385-96af-b7f9-b2588b874d31",
+      "x-lab28-rate-limited": "true",
+      "content-length": "18",
+      "content-type": "text/plain",
+      "date": "Thu, 03 Sep 2026 17:01:29 GMT",
+      "server": "envoy",
+      "x-envoy-decorator-operation": "lab28.gateway.request"
+    },
+    "body": "local_rate_limited"
+  }
+}

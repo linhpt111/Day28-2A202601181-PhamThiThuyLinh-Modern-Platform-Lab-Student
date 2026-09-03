@@ -1,0 +1,64 @@
+{
+  "description": "IP01: events on data.raw carry idempotency-key + W3C traceparent headers produced by event_headers()",
+  "messages": [
+    {
+      "topic": "data.raw",
+      "partition": 1,
+      "offset": 96,
+      "key": "ev-asker-37596084",
+      "headers": {
+        "traceparent": "00-b4534e10b8c94669639b46f65c88de6f-76a965913bfc26cf-01",
+        "idempotency-key": "ev-asker-37596084",
+        "schema_version": "1"
+      },
+      "value": {
+        "schema_version": "1",
+        "event_id": "3c45fa2e49d9484e98623688feb19bb2",
+        "idempotency_key": "fb:ev-asker-37596084:99423fc82a26fe65b8c78d1c0858ae02",
+        "entity_id": "ev-asker-37596084",
+        "occurred_at": "2026-09-03T17:02:23.861326Z",
+        "producer": "lab28-api",
+        "traceparent": "00-b4534e10b8c94669639b46f65c88de6f-310cbd20d5678342-01",
+        "payload": {
+          "kind": "feedback",
+          "asker_id": "ev-asker-37596084",
+          "text": "Phan hoi evidence cho bai kiem thu 37596084.",
+          "rating": 5,
+          "locale": "vi",
+          "label": "positive"
+        }
+      }
+    },
+    {
+      "topic": "data.raw",
+      "partition": 0,
+      "offset": 63,
+      "key": "ev-doc-37596084",
+      "headers": {
+        "traceparent": "00-b4534e10b8c94669639b46f65c88de6f-2d3c7a1be73875d4-01",
+        "idempotency-key": "ev-doc-37596084",
+        "schema_version": "1"
+      },
+      "value": {
+        "schema_version": "1",
+        "event_id": "dd40911b4c2841369f4ca6ec90ab65c0",
+        "idempotency_key": "doc:ev-doc-37596084:c71c6e479af8b09d7b56c9612d4ca3b9",
+        "entity_id": "ev-doc-37596084",
+        "occurred_at": "2026-09-03T17:02:23.651630Z",
+        "producer": "lab28-api",
+        "traceparent": "00-b4534e10b8c94669639b46f65c88de6f-84fd77c1405dce40-01",
+        "payload": {
+          "kind": "document",
+          "doc_id": "ev-doc-37596084",
+          "title": "Tai lieu evidence 37596084",
+          "text": "Tai lieu 37596084 duoc dung de thu thap evidence cho IP01 IP02 IP04 IP10 trong bai lab Day 28 nen tang.",
+          "locale": "vi",
+          "tags": [
+            "lab28",
+            "evidence"
+          ]
+        }
+      }
+    }
+  ]
+}

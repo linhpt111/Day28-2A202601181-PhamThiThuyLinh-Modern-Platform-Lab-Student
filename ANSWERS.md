@@ -1,6 +1,6 @@
 # ANSWERS.md — Day 28 Track 2
 
-Bản nháp (`tạm`). Số liệu và bằng chứng chi tiết ở [`REPORT.md`](REPORT.md), file evidence ở `evidence/`.
+Số liệu và bằng chứng chi tiết ở [`REPORT.md`](REPORT.md), file evidence ở `evidence/`.
 
 ---
 

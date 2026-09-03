@@ -1,0 +1,23 @@
+Day 28 Track 2 - fast-suite verification
+Run date: 2026-09-04 (UTC+7)
+
+$ uv run ruff check .
+All checks passed!
+
+$ uv run python scripts/verify_matrix.py
+OK    245 checks passed: contracts/integration-matrix.yaml matches the repository
+
+$ uv run python scripts/check_portability.py
+OK    supported workflow is host-path and shell independent
+
+$ uv run python scripts/validate_manifests.py
+Kubernetes and GitOps manifest contracts passed
+
+$ uv run python -m pytest tests -q
+83 passed
+
+Notes:
+- The test command uses `python -m pytest` to avoid the local Application Control
+  policy that can block pytest.exe.
+- The live integration suite is recorded separately in REPORT.md and requires the
+  running Docker stack; GPU and LangSmith gates remain environment-gated.

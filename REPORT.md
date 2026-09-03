@@ -6,7 +6,7 @@
 - **Ngày chạy:** 2026-09-03 → 2026-09-04 (giờ máy local, UTC+7)
 - **Máy chạy:** Windows 11, 22 vCPU, ~629 GB đĩa trống, Docker Desktop 29.1.3 / Compose v2.40.3
 - **Profile preflight:** `local-standard` → chạy được **toàn bộ hệ thống** (base + `--profile full`)
-- **Trạng thái:** bản nháp (`tạm`) — phần GPU/vLLM và LangSmith chưa có credential, xem [§7](#7-những-phần-chưa-verify-được--cần-quyềntài-khoản)
+- **Trạng thái:** sẵn sàng nộp — các gate phụ thuộc môi trường (GPU/vLLM và LangSmith) được báo `UNVERIFIED` trung thực; xem [§7](#7-những-phần-chưa-verify-được--cần-quyềntài-khoản)
 
 > Tất cả số liệu dưới đây lấy từ log lệnh thật trong phiên chạy này. Các file
 > evidence JSON nằm ở `evidence/` (12 file). Không có secret, `.env`, database,

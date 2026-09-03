@@ -1,6 +1,8 @@
 # Báo cáo thực hành — Day 28 Track 2 (Platform Integration & Production Readiness)
 
 - **Người thực hiện:** Phạm Thị Thùy Linh (`linhpt111`) — làm **cá nhân**
+- **Nhánh nộp bài:** [`ca-nhan-linh`](https://github.com/linhpt111/Day28-2A202601181-PhamThiThuyLinh-Modern-Platform-Lab-Student/tree/ca-nhan-linh)
+  (repo `linhpt111/Day28-2A202601181-PhamThiThuyLinh-Modern-Platform-Lab-Student`)
 - **Ngày chạy:** 2026-09-03 → 2026-09-04 (giờ máy local, UTC+7)
 - **Máy chạy:** Windows 11, 22 vCPU, ~629 GB đĩa trống, Docker Desktop 29.1.3 / Compose v2.40.3
 - **Profile preflight:** `local-standard` → chạy được **toàn bộ hệ thống** (base + `--profile full`)

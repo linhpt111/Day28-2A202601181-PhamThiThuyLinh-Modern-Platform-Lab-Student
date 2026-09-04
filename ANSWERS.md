@@ -86,8 +86,10 @@ IP08 riêng bằng burst GET có kiểm soát, thu được đúng cặp 200 + 4
    production với nó thì một tỉ lệ request ghi dữ liệu sẽ bị mất một cách âm thầm
    (client thấy 405 chứ không phải 5xx nên thường **không retry**). Phải fix hoặc pin
    Envoy version khác trước khi lên thật, và bật access log ở gateway để quan sát.
-4. **Chưa apply lên cluster thật.** Manifest K8s + Argo CD pass contract validation nhưng
-   drift/self-heal/rollback chưa demo trực tiếp trên cluster (thiếu kubeconfig).
+4. **Cluster đã apply nhưng workload chưa healthy.** `kind-lab28` đã nhận toàn bộ manifest và
+   Argo CD Application, nhưng image `ghcr.io/vinuni-ai20k/day28-platform-api:3.0.0` bị GHCR
+   trả `403` khi pull. Vì vậy chưa thể chứng minh drift/self-heal/rollback một cách hợp lệ;
+   production cần image release public hoặc registry credential qua Secret manager.
 5. **Rate limit 10 req/s là local per-Envoy**, không phải global. Nhiều replica gateway ⇒
    giới hạn thật = 10 × số replica, không đoán được. Production cần global rate limit
    service (RLS) nếu muốn quota theo tenant.
@@ -98,8 +100,9 @@ IP08 riêng bằng burst GET có kiểm soát, thu được đúng cặp 200 + 4
    hoặc mount cache dùng chung, nếu không mỗi lần scale/rollout sẽ chậm và dễ timeout.
 8. **Secret quản lý thủ công.** Password Airflow đang sinh ra file local; production cần
    secret manager (External Secrets/Vault), không để sinh ra trong workspace.
-9. **Không có SLO/alert routing thật.** Có rule group `lab28-slo` (2 rule) nhưng chưa nối
-   Alertmanager → on-call. Alert không tới người thì không phải alert.
+9. **Alert routing mới dừng ở receiver nội bộ.** `Lab28ApiUnavailable` đã được delivery
+   `firing` rồi `resolved` qua Alertmanager webhook, nhưng production vẫn cần receiver
+   PagerDuty/Slack/email và secret quản lý ngoài repo để alert tới đúng người trực.
 
 ## 3. Đóng góp
 
@@ -157,9 +160,9 @@ thay vì có một dòng "tất cả xanh" cho đẹp.
 4. **Triển khai vLLM bền vững** và nối với stack local/Kubernetes qua endpoint có xác thực, rồi
    chạy lại J1 với GPU live. Evidence IP07 đã có vLLM thật, nhưng server Kaggle chỉ chạy tạm để
    thu evidence, chưa phải dịch vụ serving liên tục.
-5. **Apply manifest lên cluster thật** (kind/minikube) để demo được drift + self-heal +
-   desired-state rollback, thay vì chỉ validate contract.
-6. **Nối Alertmanager** cho rule group `lab28-slo` — alert hiện chưa tới ai.
+5. **Mở quyền pull image release** cho cluster, rồi chạy drift + self-heal + desired-state
+   rollback trên Argo CD. Cluster `kind` và Application đã có, blocker hiện tại là GHCR 403.
+6. **Nối Alertmanager tới on-call thật** (PagerDuty/Slack/email) thay cho receiver nội bộ.
 
 ## 5. Ba câu tự kiểm
 

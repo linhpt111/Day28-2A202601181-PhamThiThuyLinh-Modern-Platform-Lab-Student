@@ -1,0 +1,89 @@
+{
+  "alert": "Lab28ApiUnavailable",
+  "prometheus_currently_firing": false,
+  "receiver_firing_delivery": true,
+  "receiver_events": [
+    {
+      "receiver": "lab28-webhook",
+      "status": "firing",
+      "alerts": [
+        {
+          "status": "firing",
+          "labels": {
+            "alertname": "Lab28ApiUnavailable",
+            "instance": "api:8000",
+            "job": "lab28-api",
+            "severity": "critical"
+          },
+          "annotations": {
+            "description": "Check the API container and its Kafka, Qdrant and MLflow dependencies.",
+            "summary": "Lab 28 API is not being scraped"
+          },
+          "startsAt": "2026-09-04T00:36:44.632Z",
+          "endsAt": "0001-01-01T00:00:00Z",
+          "generatorURL": "http://c278736d9ae1:9090/graph?g0.expr=up%7Bjob%3D%22lab28-api%22%7D+%3D%3D+0&g0.tab=1",
+          "fingerprint": "055d1c7b6c5a3597"
+        }
+      ],
+      "groupLabels": {
+        "alertname": "Lab28ApiUnavailable",
+        "job": "lab28-api"
+      },
+      "commonLabels": {
+        "alertname": "Lab28ApiUnavailable",
+        "instance": "api:8000",
+        "job": "lab28-api",
+        "severity": "critical"
+      },
+      "commonAnnotations": {
+        "description": "Check the API container and its Kafka, Qdrant and MLflow dependencies.",
+        "summary": "Lab 28 API is not being scraped"
+      },
+      "externalURL": "http://76976fef1fa2:9093",
+      "version": "4",
+      "groupKey": "{}:{alertname=\"Lab28ApiUnavailable\", job=\"lab28-api\"}",
+      "truncatedAlerts": 0
+    },
+    {
+      "receiver": "lab28-webhook",
+      "status": "resolved",
+      "alerts": [
+        {
+          "status": "resolved",
+          "labels": {
+            "alertname": "Lab28ApiUnavailable",
+            "instance": "api:8000",
+            "job": "lab28-api",
+            "severity": "critical"
+          },
+          "annotations": {
+            "description": "Check the API container and its Kafka, Qdrant and MLflow dependencies.",
+            "summary": "Lab 28 API is not being scraped"
+          },
+          "startsAt": "2026-09-04T00:36:44.632Z",
+          "endsAt": "2026-09-04T00:37:14.632Z",
+          "generatorURL": "http://c278736d9ae1:9090/graph?g0.expr=up%7Bjob%3D%22lab28-api%22%7D+%3D%3D+0&g0.tab=1",
+          "fingerprint": "055d1c7b6c5a3597"
+        }
+      ],
+      "groupLabels": {
+        "alertname": "Lab28ApiUnavailable",
+        "job": "lab28-api"
+      },
+      "commonLabels": {
+        "alertname": "Lab28ApiUnavailable",
+        "instance": "api:8000",
+        "job": "lab28-api",
+        "severity": "critical"
+      },
+      "commonAnnotations": {
+        "description": "Check the API container and its Kafka, Qdrant and MLflow dependencies.",
+        "summary": "Lab 28 API is not being scraped"
+      },
+      "externalURL": "http://76976fef1fa2:9093",
+      "version": "4",
+      "groupKey": "{}:{alertname=\"Lab28ApiUnavailable\", job=\"lab28-api\"}",
+      "truncatedAlerts": 0
+    }
+  ]
+}

@@ -93,7 +93,7 @@ vLLM trên Kaggle, chưa phải replay một request RAG end-to-end qua endpoint
 | IP06 | Eval → MLflow Registry | ✅ | `ip06-mlflow-release.json`: `lab28-rag-release v2 is champion`, run_id `f430cb76…`; J3 chứng minh promote + rollback alias |
 | IP07 | RAG → vLLM thật | ✅ | `ip07-vllm-identity.json`: Kaggle **Tesla T4**, vLLM **0.8.5**, model `Qwen/Qwen3-4B-Instruct-2507`; `/health`, `/version`, `/v1/models`, `/metrics` đều HTTP 200 và metric `vllm:cache_config_info` xác thực server vLLM thật. Đây là identity evidence; endpoint tạm đã dừng sau phiên chạy. |
 | IP08 | Client → Envoy gateway | ✅ | `ip08-gateway.json`: `200 OK` (x-request-id `67d07dd5…`) và `429 Too Many Requests` (x-request-id `929df1b5…`) — rate limit 10 token/1s hoạt động đúng |
-| IP09 | → Prometheus/Grafana | ✅ | `ip09-prometheus-targets.json`: 9/10 target `up` (chỉ `lab28-vllm-optional` down = đúng dự kiến), rule group `lab28-slo` (2 rule); `ip09-grafana-dashboards.json`: dashboard `Lab 28 Platform Overview` |
+| IP09 | → Prometheus/Grafana | ✅ | `ip09-prometheus-targets.json`: 9/10 target `up` (chỉ `lab28-vllm-optional` down = đúng dự kiến), rule group `lab28-slo` (2 rule); `ip09-grafana-dashboards.json`: dashboard `Lab 28 Platform Overview`; `ip09-alert-delivery.json`: `Lab28ApiUnavailable` đã delivery `firing` và `resolved` qua Alertmanager webhook. |
 | IP10 | → OTLP trace | ✅ | `ip10-trace.json`: trace `44cbe2cbfba3f43a05f175a98f89e7fb`, **20 span, 3 service**, `missing_required: []`; `ip10-langsmith.json`: OTLP fan-out tới LangSmith, project query HTTP 200, exporter không lỗi |
 
 ## 5. Năm luồng kiểm thử (J1–J5) + gate còn lại
@@ -167,7 +167,7 @@ Ghi rõ evidence external và các giới hạn môi trường, không giả l�
 |---|---|---|
 | **IP07 — vLLM thật** | ✅ `VERIFIED` | Kaggle kernel [`linhpt111/lab28-ip07-vllm-evidence`](https://www.kaggle.com/code/linhpt111/lab28-ip07-vllm-evidence) chạy trên Tesla T4 và xuất artifact có `/version`, `/v1/models`, `/metrics` cùng prefix `vllm:`. Server đã được tắt sau khi thu evidence; không commit URL tunnel hay token. |
 | **LangSmith tracing** | ✅ `VERIFIED` | `compose.langsmith.yaml` bật OTLP HTTP fan-out mà không lưu key trong repo. Project `lab28-platform` trả HTTP 200; Prometheus ghi nhận exporter `otlphttp/langsmith`; evidence `ip10-langsmith.json` và gate `test_the_langsmith_export_leg_is_configured_and_healthy` đều pass (`1 passed`). |
-| **Kubernetes/Argo CD chạy thật** | Manifest ✅ / cluster ❌ | `scripts/validate_manifests.py` pass (contract K8s + GitOps hợp lệ), nhưng chưa apply lên cluster thật vì không có cluster/kubeconfig. Cần cluster (kind/minikube/lớp cấp) để demo drift + self-heal + desired-state rollback trực tiếp. |
+| **Kubernetes/Argo CD chạy thật** | Cluster/apply ✅ / workload ❌ | Cluster `kind-lab28` đã apply namespace, ConfigMap, Deployment, Service, HPA/PDB, NetworkPolicy, Gateway/HTTPRoute và Argo CD Application. Workload chưa healthy vì image `ghcr.io/vinuni-ai20k/day28-platform-api:3.0.0` bị GHCR trả `403` khi pull; vì thế chưa có bằng chứng drift/self-heal/rollback hợp lệ. Cần image registry cho phép pull hoặc image release public trước khi chạy lại. |
 
 Ngoài ra, hai vấn đề **môi trường** đã gặp và cách xử lý (không bypass gì):
 
@@ -262,7 +262,7 @@ loại khỏi rotation và toàn bộ request sẽ hỏng, dù retrieval + LLM v
 - [x] Golden signals trên Grafana + một trace Jaeger xuyên hệ thống (20 span/3 service)
 - [x] MLflow promote rồi rollback alias mà không sửa code (J3)
 - [x] Giải thích `ready` / `degraded` / `not_ready` ([§6](#6-readiness--ready--degraded--not_ready))
-- [x] Manifest K8s/GitOps hợp lệ (`validate_manifests.py` pass) — chưa apply lên cluster thật
+- [ ] K8s/GitOps workload healthy + drift/self-heal/rollback — cluster `kind` và Argo Application đã apply, nhưng image GHCR bị `403` khi pull
 - [x] Người làm giải thích được lựa chọn kỹ thuật của từng phần ([ANSWERS.md](ANSWERS.md))
 - [x] Không commit secret / token / DB / cache / model weights
 - [x] IP07 với vLLM thật — Kaggle Tesla T4, vLLM 0.8.5, model Qwen 4B và metric `vllm:`

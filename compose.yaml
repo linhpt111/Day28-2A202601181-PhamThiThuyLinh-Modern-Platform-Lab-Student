@@ -284,6 +284,32 @@ services:
     ports:
       - "${LAB28_PUSHGATEWAY_PORT:-9091}:9091"
 
+  alert-receiver:
+    image: python:3.12-alpine
+    command: ["python", "/app/alert_receiver.py"]
+    ports:
+      - "${LAB28_ALERT_RECEIVER_PORT:-18080}:8080"
+    volumes:
+      - ./monitoring/alert_receiver.py:/app/alert_receiver.py:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/health >/dev/null"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
+    ports:
+      - "${LAB28_ALERTMANAGER_PORT:-9093}:9093"
+    volumes:
+      - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    depends_on:
+      alert-receiver:
+        condition: service_healthy
+
   prometheus:
     image: prom/prometheus:v3.14.0
     command:
@@ -307,6 +333,7 @@ services:
       - mlflow
       - otel-collector
       - pushgateway
+      - alertmanager
 
   grafana:
     image: grafana/grafana:13.2.1

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import time
@@ -46,7 +47,15 @@ def metric_names(body: str) -> list[str]:
 
 def main() -> None:
     install = subprocess.run(
-        [sys.executable, "-m", "pip", "install", "--no-cache-dir", "vllm==0.8.5"],
+        [
+            sys.executable,
+            "-m",
+            "pip",
+            "install",
+            "--no-cache-dir",
+            "vllm==0.8.5",
+            "transformers==4.51.3",
+        ],
         capture_output=True,
         text=True,
         check=False,
@@ -70,7 +79,19 @@ def main() -> None:
         "--enforce-eager",
     ]
     with LOG_PATH.open("w", encoding="utf-8") as log:
-        process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT, text=True)
+        environment = os.environ.copy()
+        # Kaggle preinstalls TensorFlow with a protobuf range incompatible with
+        # vLLM's pinned protobuf. vLLM does not need TensorFlow for this model.
+        environment["TRANSFORMERS_NO_TF"] = "1"
+        environment["USE_TF"] = "0"
+        environment["USE_TORCH"] = "1"
+        process = subprocess.Popen(
+            command,
+            stdout=log,
+            stderr=subprocess.STDOUT,
+            text=True,
+            env=environment,
+        )
         try:
             wait_for_server(process)
             version = request("/version")

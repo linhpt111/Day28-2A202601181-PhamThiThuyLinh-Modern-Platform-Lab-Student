@@ -20,7 +20,7 @@ Kiểm tra GPU trước:
 
 ```bash
 !nvidia-smi
-!pip install -q --no-cache-dir "vllm==0.8.5"
+!pip install -q --no-cache-dir "vllm==0.8.5" "transformers==4.51.3"
 ```
 
 Chạy model nhỏ phù hợp T4:
@@ -29,11 +29,13 @@ Chạy model nhỏ phù hợp T4:
 !vllm serve Qwen/Qwen3-4B-Instruct-2507 \
   --host 0.0.0.0 --port 8000 \
   --dtype half --max-model-len 4096 \
-  --gpu-memory-utilization 0.85
+  --gpu-memory-utilization 0.85 --enforce-eager
 ```
 
 Lệnh dùng vLLM 0.8.5 (CUDA 12.1 prebuilt wheel, phù hợp image Kaggle T4 hiện tại) và
-và [model card Qwen3-4B-Instruct-2507](https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507).
+[model card Qwen3-4B-Instruct-2507](https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507).
+Nếu image Kaggle có TensorFlow với protobuf không tương thích, chạy server với
+`USE_TF=0 USE_TORCH=1` để Transformers không import TensorFlow.
 
 Kiểm tra endpoint trong cùng session:
 

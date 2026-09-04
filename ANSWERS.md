@@ -77,9 +77,11 @@ IP08 riêng bằng burst GET có kiểm soát, thu được đúng cặp 200 + 4
    fan-out 5 probe live (đo được ở [REPORT §7](REPORT.md#7-load-profile--phân-tích-bottleneck)).
    Khi scale pod, chính readiness probe của K8s sẽ bơm tải lên Kafka/MLflow/Qdrant/Feast.
    Cần probe nền + cache TTL ngắn, `/ready` chỉ đọc snapshot.
-2. **IP07 chưa chứng minh được với vLLM thật** — không có GPU. Đang `degraded` ở LLM.
-   Production cần vLLM thật + kiểm tra danh tính (`/version`, `/v1/models`, metric `vllm:`),
-   cộng thêm timeout/circuit breaker và fallback rõ ràng khi GPU node chết.
+2. **IP07 đã xác thực vLLM thật trên Kaggle Tesla T4.** Evidence ghi nhận vLLM `0.8.5`,
+   model Qwen3 4B và HTTP 200 cho `/health`, `/version`, `/v1/models`, `/metrics` với metric
+   `vllm:` ([evidence](evidence/ip07-vllm-identity.json)). Server Kaggle đã dừng sau khi thu
+   evidence, nên production vẫn cần một GPU deployment bền vững, URL/auth ổn định, timeout,
+   circuit breaker và fallback rõ ràng khi GPU node chết.
 3. **Envoy 405 intermittent** — một defect hạ tầng chưa có root cause dứt điểm. Chạy
    production với nó thì một tỉ lệ request ghi dữ liệu sẽ bị mất một cách âm thầm
    (client thấy 405 chứ không phải 5xx nên thường **không retry**). Phải fix hoặc pin
@@ -107,7 +109,7 @@ Làm **cá nhân** (không theo nhóm), nên một người thực hiện toàn 
 |---|---|
 | Ingestion & Orchestration (IP01–IP02) | `event_headers`; verify header traceparent + idempotency-key trên `data.raw`; trigger DAG qua REST API v2, thu run/task/asset event |
 | Data & ML (IP03–IP04–IP06) | `dedupe_latest`, `feast_online_request`; verify Delta MERGE history + time travel; Feast materialize + online read; MLflow release/champion + rollback (J3) |
-| Serving & Retrieval (IP05–IP07) | Index Qdrant với point ID deterministic; xác nhận IP07 `UNVERIFIED` đúng cách, không fake vLLM |
+| Serving & Retrieval (IP05–IP07) | Index Qdrant với point ID deterministic; verify vLLM 0.8.5 + Qwen3 4B trên Kaggle T4 qua health/version/models/metrics `vllm:`, không fake vLLM |
 | Platform & Observability (IP08–IP10) | `readiness_status`; thu evidence gateway 200/429; Prometheus targets + rule; Grafana dashboard; trace 6 span/3 service qua Jaeger; validate manifest K8s/GitOps |
 | Presenter / Incident Commander | [`REPORT.md`](REPORT.md), evidence index, phân tích bottleneck, và điều tra sự cố Envoy 405 ở [REPORT §9](REPORT.md#9-phát-hiện-đáng-lưu-ý-envoy-gateway-trả-405-không-đúng-intermittent) |
 
@@ -152,7 +154,9 @@ thay vì có một dòng "tất cả xanh" cho đẹp.
    có tác động lớn nhất và rẻ nhất trong danh sách.
 3. **Bake embedding model vào image Airflow** để cold start không còn 227 s và DAG run
    đầu tiên không vượt timeout của test.
-4. **Nối vLLM thật** để đóng IP07 — phần duy nhất còn `UNVERIFIED` về mặt kỹ thuật.
+4. **Triển khai vLLM bền vững** và nối với stack local/Kubernetes qua endpoint có xác thực, rồi
+   chạy lại J1 với GPU live. Evidence IP07 đã có vLLM thật, nhưng server Kaggle chỉ chạy tạm để
+   thu evidence, chưa phải dịch vụ serving liên tục.
 5. **Apply manifest lên cluster thật** (kind/minikube) để demo được drift + self-heal +
    desired-state rollback, thay vì chỉ validate contract.
 6. **Nối Alertmanager** cho rule group `lab28-slo` — alert hiện chưa tới ai.

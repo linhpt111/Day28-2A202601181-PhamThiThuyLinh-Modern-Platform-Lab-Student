@@ -1,9 +1,22 @@
 {
-  "reachable": false,
-  "version": null,
-  "served_models": [],
-  "vllm_metric_names": [],
-  "vllm_metric_count": 0,
-  "is_real_vllm": false,
-  "detail": "unreachable: ConnectError"
+  "reachable": true,
+  "server": "Kaggle NVIDIA Tesla T4",
+  "version": {
+    "version": "0.8.5"
+  },
+  "served_models": [
+    "Qwen/Qwen3-4B-Instruct-2507"
+  ],
+  "vllm_metric_names": [
+    "vllm:cache_config_info"
+  ],
+  "vllm_metric_count": 1,
+  "is_real_vllm": true,
+  "evidence_source": "https://www.kaggle.com/code/linhpt111/lab28-ip07-vllm-evidence",
+  "verification": {
+    "health": 200,
+    "version": 200,
+    "models": 200,
+    "metrics": 200
+  }
 }

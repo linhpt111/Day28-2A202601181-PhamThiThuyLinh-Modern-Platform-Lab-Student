@@ -1,0 +1,16 @@
+{
+  "id": "linhpt111/lab28-ip07-vllm-evidence",
+  "title": "Lab28 IP07 vLLM evidence",
+  "code_file": "run_ip07_evidence.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": "true",
+  "enable_gpu": "true",
+  "enable_tpu": "false",
+  "enable_internet": "true",
+  "machine_shape": "",
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}

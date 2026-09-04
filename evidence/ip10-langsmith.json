@@ -1,0 +1,15 @@
+{
+  "description": "IP10 LangSmith OTLP fan-out verification",
+  "endpoint": "https://api.smith.langchain.com/otel/v1/traces",
+  "project": "lab28-platform",
+  "project_query_status": 200,
+  "project_sessions_found": 1,
+  "prometheus_exporters": [
+    "debug",
+    "otlp/jaeger",
+    "otlphttp/langsmith"
+  ],
+  "send_failures": 0,
+  "test": "integration-tests/test_trace_span_coverage.py -m langsmith",
+  "result": "1 passed, 4 deselected"
+}

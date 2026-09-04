@@ -20,7 +20,7 @@ Kiểm tra GPU trước:
 
 ```bash
 !nvidia-smi
-!pip install -q "vllm==0.26.0"
+!pip install -q --no-cache-dir "vllm==0.8.5"
 ```
 
 Chạy model nhỏ phù hợp T4:
@@ -32,7 +32,7 @@ Chạy model nhỏ phù hợp T4:
   --gpu-memory-utilization 0.85
 ```
 
-Lệnh bám theo [`vllm serve` 0.26.0](https://docs.vllm.ai/en/v0.26.0/cli/serve/)
+Lệnh dùng vLLM 0.8.5 (CUDA 12.1 prebuilt wheel, phù hợp image Kaggle T4 hiện tại) và
 và [model card Qwen3-4B-Instruct-2507](https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507).
 
 Kiểm tra endpoint trong cùng session:

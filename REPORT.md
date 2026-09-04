@@ -1,15 +1,15 @@
 # Báo cáo thực hành — Day 28 Track 2 (Platform Integration & Production Readiness)
 
 - **Người thực hiện:** Phạm Thị Thùy Linh (`linhpt111`) — làm **cá nhân**
-- **Nhánh nộp bài:** [`ca-nhan-linh`](https://github.com/linhpt111/Day28-2A202601181-PhamThiThuyLinh-Modern-Platform-Lab-Student/tree/ca-nhan-linh)
+- **Nhánh nộp bài:** [`main`](https://github.com/linhpt111/Day28-2A202601181-PhamThiThuyLinh-Modern-Platform-Lab-Student/tree/main)
   (repo `linhpt111/Day28-2A202601181-PhamThiThuyLinh-Modern-Platform-Lab-Student`)
 - **Ngày chạy:** 2026-09-03 → 2026-09-04 (giờ máy local, UTC+7)
 - **Máy chạy:** Windows 11, 22 vCPU, ~629 GB đĩa trống, Docker Desktop 29.1.3 / Compose v2.40.3
 - **Profile preflight:** `local-standard` → chạy được **toàn bộ hệ thống** (base + `--profile full`)
-- **Trạng thái:** sẵn sàng nộp — các gate phụ thuộc môi trường (GPU/vLLM và LangSmith) được báo `UNVERIFIED` trung thực; xem [§7](#7-những-phần-chưa-verify-được--cần-quyềntài-khoản)
+- **Trạng thái:** sẵn sàng nộp — LangSmith đã verify; IP07 chỉ được báo `UNVERIFIED` cho tới khi evidence vLLM thật từ Kaggle hoàn tất, xem [§8](#8-những-phần-chưa-verify-được--cần-quyềntài-khoản)
 
 > Tất cả số liệu dưới đây lấy từ log lệnh thật trong phiên chạy này. Các file
-> evidence JSON nằm ở `evidence/` (12 file). Không có secret, `.env`, database,
+> evidence JSON và transcript fast suite nằm ở `evidence/`. Không có secret, `.env`, database,
 > cache hay model weights nào được commit.
 
 ---
@@ -36,6 +36,9 @@ scripts/verify_matrix.py                → OK  245 checks passed
 scripts/check_portability.py            → OK  host-path and shell independent
 scripts/validate_manifests.py           → Kubernetes and GitOps manifest contracts passed
 ```
+
+Transcript đầy đủ của fast suite được lưu tại
+[`evidence/fast-suite-output.txt`](evidence/fast-suite-output.txt).
 
 ## 2. Docker config + khởi động hệ thống (Bước 6–8)
 
@@ -87,12 +90,12 @@ Bốn điểm `unverified` là do bản chất thiết kế (không probe đư�
 | IP04 | Delta → Feast | ✅ | `ip04-feast-online.json`: HTTP 200, cả 4 feature `PRESENT` cho `ev-asker-37596084` (avg_rating 5.0, feedback_count 1, negative_ratio 0.0, delta_version 20) |
 | IP05 | Delta docs → Qdrant | ✅ | `ip05-qdrant-search.json`: 54 point, embedding `paraphrase-multilingual-MiniLM-L12-v2@faf4aa42…`, point ID deterministic (uuid5) |
 | IP06 | Eval → MLflow Registry | ✅ | `ip06-mlflow-release.json`: `lab28-rag-release v2 is champion`, run_id `f430cb76…`; J3 chứng minh promote + rollback alias |
-| IP07 | RAG → vLLM thật | ⚠️ **UNVERIFIED** | `ip07-vllm-identity.json`: `unreachable: ConnectError`, `is_real_vllm=false`. Không có GPU/endpoint — xem [§7](#7-những-phần-chưa-verify-được--cần-quyềntài-khoản). **Không fake server.** |
+| IP07 | RAG → vLLM thật | ⚠️ **UNVERIFIED** | Evidence Kaggle đang chạy; chỉ cập nhật sang pass khi có đủ `/version`, `/v1/models`, và metric `vllm:`. **Không fake server.** |
 | IP08 | Client → Envoy gateway | ✅ | `ip08-gateway.json`: `200 OK` (x-request-id `67d07dd5…`) và `429 Too Many Requests` (x-request-id `929df1b5…`) — rate limit 10 token/1s hoạt động đúng |
 | IP09 | → Prometheus/Grafana | ✅ | `ip09-prometheus-targets.json`: 9/10 target `up` (chỉ `lab28-vllm-optional` down = đúng dự kiến), rule group `lab28-slo` (2 rule); `ip09-grafana-dashboards.json`: dashboard `Lab 28 Platform Overview` |
-| IP10 | → OTLP trace | ✅ | `ip10-trace.json`: trace `44cbe2cbfba3f43a05f175a98f89e7fb`, **20 span, 3 service**, `missing_required: []` — đủ 6 span bắt buộc: `lab28.gateway.request` → `lab28.api.ingest` → `lab28.kafka.produce` → `lab28.kafka.consume` → `lab28.airflow.dag` → `lab28.spark.delta_merge` |
+| IP10 | → OTLP trace | ✅ | `ip10-trace.json`: trace `44cbe2cbfba3f43a05f175a98f89e7fb`, **20 span, 3 service**, `missing_required: []`; `ip10-langsmith.json`: OTLP fan-out tới LangSmith, project query HTTP 200, exporter không lỗi |
 
-## 4. Năm luồng kiểm thử (J1–J5) + gate còn lại
+## 5. Năm luồng kiểm thử (J1–J5) + gate còn lại
 
 ```text
 pytest integration-tests -m "not gpu and not langsmith" -q
@@ -109,8 +112,9 @@ Chi tiết từng luồng:
 | J4 degraded recovery | ✅ trong `15 passed` | Thành phần không bắt buộc chết → `degraded` → hồi phục |
 | J5 trace/metrics continuity | ✅ trong `20 passed` | trace ID + golden signals giữ xuyên luồng |
 | gateway rate limit / prometheus targets / trace span coverage | ✅ trong `20 passed` | 3 gate cuối |
+| LangSmith export leg | **1 passed, 4 deselected** | Collector fan-out sang `otlphttp/langsmith`; LangSmith project `lab28-platform` truy vấn được và Prometheus thấy exporter Jaeger + LangSmith |
 
-## 5. Readiness — `ready` / `degraded` / `not_ready`
+## 6. Readiness — `ready` / `degraded` / `not_ready`
 
 Đây là chỗ dễ nhầm nhất nên tách rõ:
 
@@ -130,7 +134,7 @@ GET http://localhost:8080/health → {"status":"alive","service":"lab28-api"}
   ⇒ vLLM thành mandatory). Đây là khác biệt **cấu hình môi trường host vs container**,
   không phải bug logic — cùng một hàm, khác input `mandatory`.
 
-## 6. Load profile & phân tích bottleneck
+## 7. Load profile & phân tích bottleneck
 
 ```text
 uv run python load-tests/run_profile.py --requests 200 --workers 8
@@ -154,14 +158,14 @@ readiness probe sẽ trở thành nguồn tải lên các dependency khi scale p
 Rate limit của gateway cũng đo được: 20 request GET `/ready` song song → 6×429 + 14×200,
 đúng token bucket `max_tokens=10, tokens_per_fill=10, fill_interval=1s`.
 
-## 7. Những phần chưa verify được — cần quyền/tài khoản
+## 8. Những phần chưa verify được — cần quyền/tài khoản
 
 Ghi rõ theo yêu cầu `SUBMISSION.md` (báo `UNVERIFIED`, **không giả lập**):
 
 | Hạng mục | Trạng thái | Cần gì để hoàn tất |
 |---|---|---|
-| **IP07 — vLLM thật** | `UNVERIFIED` | Máy này không có GPU NVIDIA. Cần **tài khoản Kaggle** (T4, còn quota) theo `KAGGLE_GPU_EXTENSION.md`, hoặc **endpoint vLLM + model ID do giảng viên cấp**. Sau đó set `LAB28_VLLM_BASE_URL` / `LAB28_VLLM_MODEL_ID` (không commit URL/token). Gate yêu cầu chứng minh `/version`, `/v1/models`, và metric prefix `vllm:` — server chỉ giả OpenAI API sẽ **không** pass. 3–7 test bị `skip` ở mỗi suite là do gate này. |
-| **LangSmith tracing** | `UNVERIFIED` | Thiếu `LANGSMITH_API_KEY` ⇒ 1 test `skip`. Cần API key của lớp. (IP10 vẫn đã chứng minh đầy đủ bằng OTLP/Jaeger.) |
+| **IP07 — vLLM thật** | `UNVERIFIED` | Kaggle kernel `linhpt111/lab28-ip07-vllm-evidence` đang chạy trên Tesla T4. Chỉ hoàn tất sau khi artifact xác nhận `/version`, `/v1/models`, và metric prefix `vllm:`; không commit URL tunnel hay token. |
+| **LangSmith tracing** | ✅ `VERIFIED` | `compose.langsmith.yaml` bật OTLP HTTP fan-out mà không lưu key trong repo. Project `lab28-platform` trả HTTP 200; Prometheus ghi nhận exporter `otlphttp/langsmith`; evidence `ip10-langsmith.json` và gate `test_the_langsmith_export_leg_is_configured_and_healthy` đều pass (`1 passed`). |
 | **Kubernetes/Argo CD chạy thật** | Manifest ✅ / cluster ❌ | `scripts/validate_manifests.py` pass (contract K8s + GitOps hợp lệ), nhưng chưa apply lên cluster thật vì không có cluster/kubeconfig. Cần cluster (kind/minikube/lớp cấp) để demo drift + self-heal + desired-state rollback trực tiếp. |
 
 Ngoài ra, hai vấn đề **môi trường** đã gặp và cách xử lý (không bypass gì):
@@ -174,7 +178,7 @@ Ngoài ra, hai vấn đề **môi trường** đã gặp và cách xử lý (kh�
    Access denied). Xử lý: truyền `--basetemp` sang thư mục khác. Nếu muốn dọn hẳn
    thì cần quyền admin để xóa/đổi ACL thư mục đó.
 
-## 8. Phát hiện đáng lưu ý: Envoy gateway trả 405 không đúng (intermittent)
+## 9. Phát hiện đáng lưu ý: Envoy gateway trả 405 không đúng (intermittent)
 
 Đây là phát hiện thật trong lúc chạy, **chưa sửa** (không tự ý đổi `gateway/envoy.yaml`
 vì đó là hạ tầng đề bài cấp, và đổi nó sẽ làm sai lệch bằng chứng IP08):
@@ -213,7 +217,7 @@ vào đủ, rồi thu evidence IP08 riêng bằng burst GET có kiểm soát.
 **Đề nghị:** nếu lỗi này còn ở môi trường của lớp, nên thử pin Envoy sang bản
 stable khác hoặc bật access log ở gateway để xác nhận request có tới upstream không.
 
-## 9. Sự cố đã tạo: dấu hiệu → quan sát → nguyên nhân → khôi phục
+## 10. Sự cố đã tạo: dấu hiệu → quan sát → nguyên nhân → khôi phục
 
 Scenario **"Feast down"** theo `runbooks/failure-injection.md`. Chỉ thao tác service
 trong project `lab28-platform`, **không dùng `down -v`** (sẽ xóa state).
@@ -248,7 +252,7 @@ số event đã gửi), version 21 → 22 (một commit MERGE mới).
 *giảm chất lượng* thay vì *sập dịch vụ*. Nếu Feast bị đánh dấu mandatory, pod đã bị
 loại khỏi rotation và toàn bộ request sẽ hỏng, dù retrieval + LLM vẫn chạy được.
 
-## 10. Checklist demo — trạng thái
+## 11. Checklist demo — trạng thái
 
 - [x] Sơ đồ kiến trúc, người phụ trách, 10 điểm kết nối
 - [x] Luồng chạy đúng có run ID (`ev-37596084`), trace ID (`44cbe2cb…`), Delta version (feedback v23 / documents v13), MLflow version (v6 champion)
@@ -256,13 +260,13 @@ loại khỏi rotation và toàn bộ request sẽ hỏng, dù retrieval + LLM v
 - [x] Sự cố + khôi phục + chứng minh không mất dữ liệu (J4 degraded → recovery)
 - [x] Golden signals trên Grafana + một trace Jaeger xuyên hệ thống (20 span/3 service)
 - [x] MLflow promote rồi rollback alias mà không sửa code (J3)
-- [x] Giải thích `ready` / `degraded` / `not_ready` ([§5](#5-readiness--ready--degraded--not_ready))
+- [x] Giải thích `ready` / `degraded` / `not_ready` ([§6](#6-readiness--ready--degraded--not_ready))
 - [x] Manifest K8s/GitOps hợp lệ (`validate_manifests.py` pass) — chưa apply lên cluster thật
 - [x] Người làm giải thích được lựa chọn kỹ thuật của từng phần ([ANSWERS.md](ANSWERS.md))
 - [x] Không commit secret / token / DB / cache / model weights
-- [ ] IP07 với vLLM thật — **chờ GPU/endpoint** ([§7](#7-những-phần-chưa-verify-được--cần-quyềntài-khoản))
+- [ ] IP07 với vLLM thật — **đang chờ Kaggle kernel hoàn tất** ([§8](#8-những-phần-chưa-verify-được--cần-quyềntài-khoản))
 
-## 11. Cách chạy lại (reproduce)
+## 12. Cách chạy lại (reproduce)
 
 ```text
 uv sync --frozen --python 3.11 --extra dev --extra integration --no-editable

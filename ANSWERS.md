@@ -64,7 +64,7 @@ thêm/bớt một feature sẽ có nơi cập nhật, nơi không, và lỗi ch�
 
 ### 1.5 Seed qua gateway hay thẳng API?
 
-Vì lỗi 405 intermittent của Envoy ([REPORT §8](REPORT.md#8-phát-hiện-đáng-lưu-ý-envoy-gateway-trả-405-không-đúng-intermittent)),
+Vì lỗi 405 intermittent của Envoy ([REPORT §9](REPORT.md#9-phát-hiện-đáng-lưu-ý-envoy-gateway-trả-405-không-đúng-intermittent)),
 `seed --via-gateway` không vào đủ dữ liệu. Mình **không** sửa `envoy.yaml` để "cho dễ",
 vì rate limit của gateway chính là bằng chứng IP08 phải giữ nguyên. Thay vào đó tách hai
 việc: (a) nạp dữ liệu bằng `lab28 seed` đi thẳng API — vẫn là đường ingestion thật, vẫn
@@ -74,7 +74,7 @@ IP08 riêng bằng burst GET có kiểm soát, thu được đúng cặp 200 + 4
 ## 2. Production gaps — còn thiếu gì để chạy thật
 
 1. **`/ready` không cache, tự nó là bottleneck.** P50 828 ms / P99 2.17 s vì mỗi request
-   fan-out 5 probe live (đo được ở [REPORT §6](REPORT.md#6-load-profile--phân-tích-bottleneck)).
+   fan-out 5 probe live (đo được ở [REPORT §7](REPORT.md#7-load-profile--phân-tích-bottleneck)).
    Khi scale pod, chính readiness probe của K8s sẽ bơm tải lên Kafka/MLflow/Qdrant/Feast.
    Cần probe nền + cache TTL ngắn, `/ready` chỉ đọc snapshot.
 2. **IP07 chưa chứng minh được với vLLM thật** — không có GPU. Đang `degraded` ở LLM.
@@ -109,7 +109,7 @@ Làm **cá nhân** (không theo nhóm), nên một người thực hiện toàn 
 | Data & ML (IP03–IP04–IP06) | `dedupe_latest`, `feast_online_request`; verify Delta MERGE history + time travel; Feast materialize + online read; MLflow release/champion + rollback (J3) |
 | Serving & Retrieval (IP05–IP07) | Index Qdrant với point ID deterministic; xác nhận IP07 `UNVERIFIED` đúng cách, không fake vLLM |
 | Platform & Observability (IP08–IP10) | `readiness_status`; thu evidence gateway 200/429; Prometheus targets + rule; Grafana dashboard; trace 6 span/3 service qua Jaeger; validate manifest K8s/GitOps |
-| Presenter / Incident Commander | [`REPORT.md`](REPORT.md), evidence index, phân tích bottleneck, và điều tra sự cố Envoy 405 ở [REPORT §8](REPORT.md#8-phát-hiện-đáng-lưu-ý-envoy-gateway-trả-405-không-đúng-intermittent) |
+| Presenter / Incident Commander | [`REPORT.md`](REPORT.md), evidence index, phân tích bottleneck, và điều tra sự cố Envoy 405 ở [REPORT §9](REPORT.md#9-phát-hiện-đáng-lưu-ý-envoy-gateway-trả-405-không-đúng-intermittent) |
 
 ## 4. Reflection
 
@@ -140,7 +140,7 @@ Khi `seed --via-gateway` bị 405/429, có hai lối: (a) sửa `gateway/envoy.y
 Mình chọn **(b)**. Sửa rate limit sẽ làm chính bằng chứng IP08 mất giá trị — cặp 200/429
 là thứ đề bài yêu cầu chứng minh. Đổi config để test xanh là tự làm hỏng phép đo của mình.
 Cái giá phải trả: `seed --via-gateway` vẫn exit 1 và mình phải giải thích dài dòng trong
-[REPORT §8](REPORT.md#8-phát-hiện-đáng-lưu-ý-envoy-gateway-trả-405-không-đúng-intermittent)
+[REPORT §9](REPORT.md#9-phát-hiện-đáng-lưu-ý-envoy-gateway-trả-405-không-đúng-intermittent)
 thay vì có một dòng "tất cả xanh" cho đẹp.
 
 ### 4.3 Điều sẽ cải tiến nếu có thêm thời gian

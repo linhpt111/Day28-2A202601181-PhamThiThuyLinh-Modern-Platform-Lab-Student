@@ -1,0 +1,8 @@
+services:
+  otel-collector:
+    command: ["--config=/etc/otelcol/langsmith.yaml"]
+    environment:
+      LANGSMITH_API_KEY: ${LANGSMITH_API_KEY:?set LANGSMITH_API_KEY before enabling this override}
+      LANGSMITH_PROJECT: ${LANGSMITH_PROJECT:-lab28-platform}
+    volumes:
+      - ./monitoring/otel-collector.langsmith.yaml:/etc/otelcol/langsmith.yaml:ro
